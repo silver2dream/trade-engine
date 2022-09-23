@@ -71,16 +71,3 @@ func (o *OrderNode) Remove() {
 	o.priceNode.pop()
 	o.guidNode.pop()
 }
-
-//func (o *OrderNode) String() string {
-//	if o == nil {
-//		return "<nil>"
-//	}
-//	price := fstrconv.ItoaDelim(int64(o.Price()), ',')
-//	quantity := fstrconv.ItoaDelim(int64(o.Amount()), ',')
-//	traderId := fstrconv.ItoaDelim(int64(o.TraderId()), '-')
-//	tradeId := fstrconv.ItoaDelim(int64(o.TradeId()), '-')
-//	stockId := fstrconv.ItoaDelim(int64(o.StockId()), '-')
-//	kind := o.kind
-//	return fmt.Sprintf("%v, price %s, quantity %s, trader %s, trade %s, stock %s", kind, price, quantity, traderId, tradeId, stockId)
-//}
