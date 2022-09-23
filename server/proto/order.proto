@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "/.;proto";
+package proto;
+
+message Order {
+  uint32 uuid = 1;
+  uint32 trade_id = 2;
+  uint64 stockId = 3;
+  int32  kind = 4;
+  uint64 quantity = 5;
+  uint64 price = 6;
+}
+
+message TradeSession {
+  uint32 trade_id = 1;
+}
