@@ -1,16 +1,14 @@
 package matcher
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"log"
 	"main/matcher/pqueue"
 	pb "main/proto"
+	"math/rand"
 	"net"
-	"strings"
 	"sync"
 )
 
@@ -28,9 +26,11 @@ type TradeMatcher struct {
 func NewMatcher() *TradeMatcher {
 	p := &TradeMatcher{
 		matchQueues: make(map[uint64]*pqueue.MatchQueues),
+		sessions:    make(map[uint32]*Session),
 		slab:        pqueue.NewSlab(20),
 		send:        make(chan string, 65535),
 		recv:        make(chan *pb.Packet, 65535),
+		traderId:    rand.Uint32(),
 	}
 	return p
 }
@@ -62,12 +62,12 @@ func (m *TradeMatcher) process() {
 		for {
 			select {
 			case packet := <-m.recv:
-				fmt.Println(packet.String())
 				order, err := m.UnPack(packet)
 				if err != nil {
 					log.Println(err)
 				}
 
+				fmt.Println(order)
 				on := m.slab.Malloc()
 				on.CopyFrom(order)
 				switch order.GetKind() {
@@ -160,25 +160,14 @@ func (m *TradeMatcher) addToSessions(conn net.Conn) error {
 	}
 
 	traderSession := &pb.TradeSession{
-		TradeId: m.traderId,
+		TraderId: m.traderId,
 	}
-	m.sessions[traderSession.GetTradeId()] = sess
+	m.sessions[traderSession.GetTraderId()] = sess
 	sess.Start()
 	m.traderId++
 
-	sess.Send(traderSession, pb.Tag1000)
+	sess.Send(traderSession, pb.TraderID)
 	return nil
-}
-
-func (m *TradeMatcher) getSessionIdentity(ip string) string {
-	ipinfo := strings.Split(ip, ":")
-	ip = ipinfo[0]
-	fmt.Println(ip)
-	h := sha1.New()
-	h.Write([]byte(ip))
-	bs := h.Sum(nil)
-	identity := hex.EncodeToString(bs)
-	return identity
 }
 
 func (m *TradeMatcher) UnPack(packet *pb.Packet) (*pb.Order, error) {
@@ -259,7 +248,7 @@ func (m *TradeMatcher) completeTrade(partial int32, full int32, b *pqueue.OrderN
 			Price:    price,
 			Quantity: quantity,
 		}
-		buyer.Send(order, pb.Tag1001)
+		buyer.Send(order, pb.Buy)
 	}
 
 	if seller, found := m.sessions[s.Uuid()]; found {
@@ -271,7 +260,7 @@ func (m *TradeMatcher) completeTrade(partial int32, full int32, b *pqueue.OrderN
 			Price:    price,
 			Quantity: quantity,
 		}
-		seller.Send(order, pb.Tag1001)
+		seller.Send(order, pb.Buy)
 	}
 }
 
@@ -283,7 +272,7 @@ func (m *TradeMatcher) completeCancelled(o *pqueue.OrderNode) {
 	m.r.RLock()
 	defer m.r.RUnlock()
 	if trader, found := m.sessions[o.Uuid()]; found {
-		trader.Send(&cm, pb.Tag1002)
+		trader.Send(&cm, pb.Cancel)
 	}
 }
 
@@ -295,6 +284,6 @@ func (m *TradeMatcher) completeNotCancelled(nc *pqueue.OrderNode) {
 	m.r.RLock()
 	defer m.r.RUnlock()
 	if trader, found := m.sessions[nc.Uuid()]; found {
-		trader.Send(&ncm, pb.Tag1003)
+		trader.Send(&ncm, pb.NotCancelled)
 	}
 }

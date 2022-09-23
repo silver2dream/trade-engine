@@ -12,5 +12,5 @@ message Order {
 }
 
 message TradeSession {
-  uint32 trade_id = 1;
+  uint32 trader_id = 1;
 }

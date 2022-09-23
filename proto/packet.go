@@ -7,19 +7,22 @@ import (
 )
 
 const (
-	BUY = iota
+	NONE = iota
+	BUY
 	SELL
 	CANCEL
 	NOT_CANCELLED
 	PARTIAL
 	FULL
+	LIST
 )
 
 const (
-	Tag1000 = "t_1000"
-	Tag1001 = "t_1001"
-	Tag1002 = "t_1002"
-	Tag1003 = "t_1003"
+	TraderID     = "t_1000"
+	Buy          = "t_1001"
+	Sell         = "t_1002"
+	Cancel       = "t_1003"
+	NotCancelled = "t_1004"
 )
 
 type Packet struct {

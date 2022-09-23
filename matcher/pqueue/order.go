@@ -18,7 +18,7 @@ func (o *OrderNode) CopyFrom(from *proto.Order) {
 	o.quantity = from.GetQuantity()
 	o.stockId = from.StockId
 	o.kind = from.GetKind()
-	o.setup(from.Price, uint64(fmath.CombineInt32(int32(from.GetUuid()), int32(from.TradeId))))
+	o.setup(from.Price, uint64(fmath.CombineInt32(int32(from.GetUuid()), int32(from.GetTradeId()))))
 }
 
 func (o *OrderNode) CopyTo(to *proto.Order) {
