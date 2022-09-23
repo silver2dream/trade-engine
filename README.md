@@ -14,7 +14,7 @@
 > 測試用 Agent，啟用後，可透過 Command Line 進行；
 > 1. Buy；
 > 2. Sell;
-> 3. Cancle;
+> 3. Cancl;
 > 4. QueryOrder;
      > 等操作。
 
